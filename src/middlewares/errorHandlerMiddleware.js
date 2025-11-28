@@ -9,8 +9,10 @@ export const errorHandlerMiddleware = (err, req, res, next) => {
     });
   }
 
-  res.status(500).json({
-    status: 500,
+  const statusCode = err.statusCode ?? 500;
+
+  res.status(statusCode).json({
+    status: statusCode,
     message: 'Internal server error',
     error: err.message,
   });
