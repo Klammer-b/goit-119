@@ -53,7 +53,7 @@ export const updateStudentByIdController = async (req, res) => {
 
   return res.json({
     status: 200,
-    message: `Student with id ${studentId} successfully created!`,
+    message: `Student with id ${studentId} successfully updated!`,
     data: student,
   });
 };
