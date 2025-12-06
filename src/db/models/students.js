@@ -15,4 +15,6 @@ const studentSchema = new Schema(
   },
 );
 
+studentSchema.index({ name: 'text' });
+
 export const Student = model('student', studentSchema);

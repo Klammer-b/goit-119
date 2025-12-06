@@ -10,6 +10,7 @@ import { celebrate } from 'celebrate';
 import { createStudentValidationSchema } from '../validation/createStudentValidationSchema.js';
 import { studentIdValidationSchema } from '../validation/studentIdValidationSchema.js';
 import { updateStudentValidationSchema } from '../validation/updateStudentValidationSchema.js';
+import { getStudentsValidationSchema } from '../validation/getStudentsValidationSchema.js';
 
 const studentsRouter = Router();
 
@@ -18,7 +19,11 @@ studentsRouter.use(
   celebrate(studentIdValidationSchema),
 );
 
-studentsRouter.get('/students', getStudentsController);
+studentsRouter.get(
+  '/students',
+  celebrate(getStudentsValidationSchema),
+  getStudentsController,
+);
 
 studentsRouter.get('/students/:studentId', getStudentByIdController);
 

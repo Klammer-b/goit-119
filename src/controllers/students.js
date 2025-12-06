@@ -8,7 +8,21 @@ import {
 } from '../service/students.js';
 
 export const getStudentsController = async (req, res) => {
-  const students = await getStudents();
+  const students = await getStudents({
+    page: req.query.page,
+    perPage: req.query.perPage,
+    sortBy: req.query.sortBy,
+    sortOrder: req.query.sortOrder,
+    filter: {
+      minAge: req.query.minAge,
+      maxAge: req.query.maxAge,
+      minAvgMark: req.query.minAvgMark,
+      maxAvgMark: req.query.maxAvgMark,
+      onDuty: req.query.onDuty,
+      gender: req.query.gender,
+    },
+    search: req.query.search,
+  });
 
   res.json({
     status: 200,
