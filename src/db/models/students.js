@@ -1,11 +1,12 @@
 import { model, Schema } from 'mongoose';
+import { GENDERS } from '../../constants/genders.js';
 
 const studentSchema = new Schema(
   {
     name: { type: String, required: true },
     age: { type: Number, required: true },
     avgMark: { type: Number, required: true },
-    gender: { type: String, required: true, enum: ['male', 'female', 'other'] },
+    gender: { type: String, required: true, enum: Object.values(GENDERS) },
     onDuty: { type: Boolean, default: false },
   },
   {
@@ -13,5 +14,7 @@ const studentSchema = new Schema(
     timestamps: true,
   },
 );
+
+studentSchema.index({ name: 'text' });
 
 export const Student = model('student', studentSchema);

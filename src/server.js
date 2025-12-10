@@ -8,6 +8,7 @@ import { errorHandlerMiddleware } from './middlewares/errorHandlerMiddleware.js'
 import { setupLogger } from './middlewares/logger.js';
 import { generateRequestId } from './middlewares/generateRequestIdMiddleware.js';
 import router from './routes/index.js';
+import { errors } from 'celebrate';
 
 export const startServer = () => {
   const app = express();
@@ -25,6 +26,8 @@ export const startServer = () => {
   app.use(router);
 
   app.use(notFoundMiddleware);
+
+  app.use(errors());
 
   app.use(errorHandlerMiddleware);
 
