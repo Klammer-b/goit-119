@@ -9,12 +9,14 @@ import { setupLogger } from './middlewares/logger.js';
 import { generateRequestId } from './middlewares/generateRequestIdMiddleware.js';
 import router from './routes/index.js';
 import { errors } from 'celebrate';
+import cookieParser from 'cookie-parser';
 
 export const startServer = () => {
   const app = express();
 
   app.use(
     cors(),
+    cookieParser(),
     json({
       type: ['application/vnd.api+json', 'application/json'],
       limit: '100kb',
