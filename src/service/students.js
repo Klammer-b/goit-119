@@ -27,6 +27,11 @@ export const getStudents = async ({
 }) => {
   const skip = (page - 1) * perPage;
   const studentsFilterQuery = Student.find();
+
+  if (filter.userId) {
+    studentsFilterQuery.where('userId').equals(filter.userId);
+  }
+
   if (filter.minAge) {
     studentsFilterQuery.where('age').gte(filter.minAge);
   }
@@ -77,8 +82,12 @@ export const getStudents = async ({
   return { students, metadata: paginationData };
 };
 
-export const getStudentById = async (studentId) => {
-  const student = await Student.findById(studentId);
+export const getStudentById = async (studentId, userId) => {
+  const student = await Student.findOne({ _id: studentId, userId });
+
+  if (!student) {
+    throw createHttpError(404, 'Student not found!');
+  }
 
   return student;
 };
@@ -89,14 +98,26 @@ export const createStudent = async (payload) => {
   return student;
 };
 
-export const updateStudentById = async (studentId, payload) => {
-  const student = await Student.findByIdAndUpdate(studentId, payload, {
-    returnOriginal: false,
-  });
+export const updateStudentById = async (studentId, payload, userId) => {
+  const student = await Student.findOneAndUpdate(
+    { _id: studentId, userId },
+    payload,
+    {
+      returnOriginal: false,
+    },
+  );
+
+  if (!student) {
+    throw createHttpError(404, 'Student not found!');
+  }
 
   return student;
 };
 
-export const deleteStudentById = async (studentId) => {
-  await Student.findByIdAndDelete(studentId);
+export const deleteStudentById = async (studentId, userId) => {
+  const student = await Student.findOneAndDelete({ _id: studentId, userId });
+
+  if (!student) {
+    throw createHttpError(404, 'Student not found!');
+  }
 };

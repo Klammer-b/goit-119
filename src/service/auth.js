@@ -4,6 +4,14 @@ import crypto from 'node:crypto';
 import { User } from '../db/models/user.js';
 import { Session } from '../db/models/session.js';
 
+const createSession = (userId) => ({
+  userId,
+  refreshToken: crypto.randomBytes(30).toString('base64'),
+  accessToken: crypto.randomBytes(30).toString('base64'),
+  accessTokenValidUntil: new Date(Date.now() + 1000 * 60 * 15), // 15 minutes
+  refreshTokenValidUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30), // 30 days
+});
+
 export const registerUser = async (payload) => {
   const foundUser = await User.findOne({ email: payload.email });
 
@@ -36,15 +44,39 @@ export const loginUser = async (payload) => {
 
   await Session.findOneAndDelete({ userId: foundUser._id });
 
-  const session = await Session.create({
-    userId: foundUser._id,
-    refreshToken: crypto.randomBytes(30).toString('base64'),
-    accessToken: crypto.randomBytes(30).toString('base64'),
-    accessTokenValidUntil: new Date(Date.now() + 1000 * 60 * 15),
-    refreshTokenValidUntil: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
-  });
+  const session = await Session.create(createSession(foundUser._id));
 
   return session;
+};
+
+export const refreshSession = async (sessionId, refreshToken) => {
+  try {
+    const session = await Session.findOne({ _id: sessionId, refreshToken });
+
+    if (!session) {
+      throw createHttpError(401, 'Session not found!');
+    }
+
+    if (session.refreshTokenValidUntil < new Date()) {
+      throw createHttpError(401, 'Session expired!');
+    }
+
+    const user = await User.findById(session.userId);
+
+    if (!user) {
+      throw createHttpError(401, 'Session not found!');
+    }
+
+    await Session.findOneAndDelete({ _id: sessionId, refreshToken });
+
+    const newSession = await Session.create(createSession(user._id));
+
+    return newSession;
+  } catch (err) {
+    await Session.findOneAndDelete({ _id: sessionId, refreshToken });
+
+    throw err;
+  }
 };
 
 export const logoutUser = async (sessionId, refreshToken) => {

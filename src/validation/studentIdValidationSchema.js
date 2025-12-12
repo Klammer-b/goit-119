@@ -1,7 +1,7 @@
 import { Joi, Segments } from 'celebrate';
 import { isValidObjectId } from 'mongoose';
 
-const validateObjectId = (value, helpers) => {
+export const validateObjectId = (value, helpers) => {
   const isValid = isValidObjectId(value);
 
   if (!isValid) {

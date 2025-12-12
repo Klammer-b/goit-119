@@ -11,8 +11,11 @@ import { createStudentValidationSchema } from '../validation/createStudentValida
 import { studentIdValidationSchema } from '../validation/studentIdValidationSchema.js';
 import { updateStudentValidationSchema } from '../validation/updateStudentValidationSchema.js';
 import { getStudentsValidationSchema } from '../validation/getStudentsValidationSchema.js';
+import { authenticate } from '../middlewares/authenticate.js';
 
 const studentsRouter = Router();
+
+studentsRouter.use('/students', authenticate);
 
 studentsRouter.use(
   '/students/:studentId',

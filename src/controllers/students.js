@@ -14,6 +14,7 @@ export const getStudentsController = async (req, res) => {
     sortBy: req.query.sortBy,
     sortOrder: req.query.sortOrder,
     filter: {
+      userId: req.user._id,
       minAge: req.query.minAge,
       maxAge: req.query.maxAge,
       minAvgMark: req.query.minAvgMark,
@@ -34,7 +35,7 @@ export const getStudentsController = async (req, res) => {
 export const getStudentByIdController = async (req, res) => {
   const { studentId } = req.params;
 
-  const student = await getStudentById(studentId);
+  const student = await getStudentById(studentId, req.user._id);
 
   if (!student) {
     throw createHttpError(404, `Student with id ${studentId} not found!`);
@@ -48,7 +49,8 @@ export const getStudentByIdController = async (req, res) => {
 };
 
 export const createStudentController = async (req, res) => {
-  const student = await createStudent(req.body);
+  const userId = req.body.userId ? req.body.userId : req.user._id;
+  const student = await createStudent({ ...req.body, userId });
 
   return res.status(201).json({
     status: 201,
@@ -59,7 +61,7 @@ export const createStudentController = async (req, res) => {
 
 export const updateStudentByIdController = async (req, res) => {
   const { studentId } = req.params;
-  const student = await updateStudentById(studentId, req.body);
+  const student = await updateStudentById(studentId, req.body, req.user._id);
 
   if (!student) {
     throw createHttpError(404, `Student with id ${studentId} not found!`);
@@ -75,7 +77,7 @@ export const updateStudentByIdController = async (req, res) => {
 export const deleteStudentByIdController = async (req, res) => {
   const { studentId } = req.params;
 
-  await deleteStudentById(studentId);
+  await deleteStudentById(studentId, req.user._id);
 
   res.status(204).send();
 };
