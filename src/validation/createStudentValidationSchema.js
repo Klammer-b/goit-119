@@ -1,5 +1,6 @@
 import { Joi, Segments } from 'celebrate';
 import { GENDERS } from '../constants/genders.js';
+import { validateObjectId } from './studentIdValidationSchema.js';
 
 export const createStudentValidationSchema = {
   [Segments.BODY]: Joi.object({
@@ -10,11 +11,6 @@ export const createStudentValidationSchema = {
       .required()
       .valid(...Object.values(GENDERS)),
     onDuty: Joi.boolean(),
+    userId: Joi.string().optional().custom(validateObjectId),
   }),
 };
-
-// name: { type: String, required: true },
-//   age: { type: Number, required: true },
-//   avgMark: { type: Number, required: true },
-//   gender: { type: String, required: true, enum: ['male', 'female', 'other'] },
-//   onDuty: { type: Boolean, default: false },

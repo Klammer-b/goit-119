@@ -1,4 +1,4 @@
-import { model, Schema } from 'mongoose';
+import { model, Schema, Types } from 'mongoose';
 import { GENDERS } from '../../constants/genders.js';
 
 const studentSchema = new Schema(
@@ -8,6 +8,7 @@ const studentSchema = new Schema(
     avgMark: { type: Number, required: true },
     gender: { type: String, required: true, enum: Object.values(GENDERS) },
     onDuty: { type: Boolean, default: false },
+    userId: { type: Types.ObjectId, required: true },
   },
   {
     versionKey: false,
