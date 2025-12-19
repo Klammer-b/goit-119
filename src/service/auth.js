@@ -1,8 +1,12 @@
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
 import { User } from '../db/models/user.js';
 import { Session } from '../db/models/session.js';
+import { sendResetPasswordEmail } from './email.js';
+import { getEnvVar } from '../helper/getEnvVar.js';
+import { ENV_VARS } from '../constants/envVars.js';
 
 const createSession = (userId) => ({
   userId,
@@ -81,4 +85,48 @@ export const refreshSession = async (sessionId, refreshToken) => {
 
 export const logoutUser = async (sessionId, refreshToken) => {
   await Session.findOneAndDelete({ _id: sessionId, refreshToken });
+};
+
+export const requestResetPasswordEmail = async (email) => {
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return;
+  }
+
+  const token = jwt.sign(
+    {
+      sub: user._id,
+      name: user.username,
+      email: user.email,
+    },
+    getEnvVar(ENV_VARS.JWT_SECRET),
+    {
+      expiresIn: '15m',
+    },
+  );
+
+  await sendResetPasswordEmail(email, { token, username: user.username });
+};
+
+export const resetPassword = async ({ token, password }) => {
+  let jwtPayload;
+
+  try {
+    jwtPayload = jwt.verify(token, getEnvVar(ENV_VARS.JWT_SECRET));
+  } catch (err) {
+    throw createHttpError(401, err.message);
+  }
+
+  const user = await User.findById(jwtPayload.sub);
+
+  if (!user) {
+    throw createHttpError(401, 'Token is invalid!');
+  }
+
+  await User.findByIdAndUpdate(jwtPayload.sub, {
+    password: await bcrypt.hash(password, 10),
+  });
+
+  await Session.findOneAndDelete({ userId: user._id });
 };
