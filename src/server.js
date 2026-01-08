@@ -10,6 +10,7 @@ import { generateRequestId } from './middlewares/generateRequestIdMiddleware.js'
 import router from './routes/index.js';
 import { errors } from 'celebrate';
 import cookieParser from 'cookie-parser';
+import { UPLOAD_DIR } from './constants/path.js';
 
 export const startServer = () => {
   const app = express();
@@ -26,6 +27,8 @@ export const startServer = () => {
   );
 
   app.use(router);
+
+  app.use('/files', express.static(UPLOAD_DIR));
 
   app.use(notFoundMiddleware);
 
